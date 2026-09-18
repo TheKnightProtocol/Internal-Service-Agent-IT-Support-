@@ -6,6 +6,7 @@ JSON data files directly and runs a small rule-based decision engine.
 """
 
 import json
+import re
 from html import escape
 from pathlib import Path
 from typing import Any
@@ -105,7 +106,6 @@ KEYWORD_RULES = [
     ("browser extension",   "software_non_catalog",  "ESCALATE", "non_catalog_requires_security_review"),
     ("not in the software", "software_non_catalog",  "ESCALATE", "non_catalog_requires_security_review"),
     ("contractor",          "vpn_contractor",        "ESCALATE", "contractor_requires_manager_approval"),
-    ("admin access",        "admin_access",          "ESCALATE", "privileged_access_requires_authorization"),
     ("locked out",          "account_unlock",        "RESOLVE",  ""),
     ("forgot my password",  "password_reset",        "RESOLVE",  ""),
     ("password",            "password_reset",        "RESOLVE",  ""),
@@ -151,8 +151,6 @@ def _classify(message: str) -> dict[str, Any]:
 
     # Special case: laptop replacement (has a year count)
     if any(k in text for k in ("replacement", "replace", "dead")) and "year" in text:
-        # look for "3.5 years", "3 years", "2 years" etc.
-        import re
         m = re.search(r"(\d+(?:\.\d+)?)\s*year", text)
         if m:
             years = float(m.group(1))
@@ -218,7 +216,6 @@ def _policy_preview(category: str) -> list[dict[str, str]]:
     if not POLICY_TEXT:
         return chunks
     for src in sources:
-        # Find the section in the policy file for this citation
         marker = f"## {src}"
         idx = POLICY_TEXT.find(marker)
         if idx == -1:
@@ -410,7 +407,7 @@ with cols[1]:
 with cols[2]:
     _render_status("Ticketing", "Enabled", True)
 with cols[3]:
-    _render_status("Audit", "Enabled", AUDIT_PATH.parent.is_dir(), True)
+    _render_status("Audit", "Enabled", True)
 
 
 # ---------------------------------------------------------------------------
