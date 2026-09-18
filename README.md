@@ -1,477 +1,368 @@
-You are the FINAL TECHNICAL LEAD, SENIOR AGENTIC AI ENGINEER, QA ENGINEER, UI/UX DESIGNER, DOCUMENTATION ENGINEER, and SUBMISSION REVIEWER for my AIONOS Agentic AI Factory Round 1 assignment.
+# Veridian Internal IT Service Agent
 
-PROJECT:
-D:\AINIOS_Agentic_AI\internal_it_service_agent
+> **Policy-Grounded Agentic AI for Internal IT Support**
+> Understand → Retrieve → Assess → Decide → Act → Audit
 
-ASSIGNMENT:
-Assignment 2 — Internal Service Agent — IT Support.
+A production-oriented prototype of an **Internal Employee IT Support Agent** built for the **AIONOS Agentic AI Factory — Round 1, Assignment 2**.
 
-IMPORTANT:
-The core project already exists and the Streamlit application currently launches. DO NOT rebuild the project from scratch. DO NOT unnecessarily replace working architecture. Inspect the existing repository first, understand what is already implemented, and make only the changes required to bring it to a polished, evaluator-ready final state.
+The system transforms unstructured employee IT requests into **policy-grounded, traceable decisions**:
 
-The objective is:
-STABLE AGENT → CORRECT POLICY GROUNDING → CORRECT DECISIONS → 15-REQUEST QA → SAFETY TESTING → PROFESSIONAL UI → DOCUMENTATION → GITHUB READY → STREAMLIT READY → DEMO READY.
+* **RESOLVE** simple, low-risk requests
+* **CLARIFY** when required information is missing or the request is ambiguous
+* **ESCALATE** risky, security-sensitive, or cross-functional requests
+* Create structured tickets when required
+* Surface the policy evidence behind decisions
+* Use historical tickets as contextual precedent
+* Maintain an append-only audit trail
 
-==================================================
+The goal is not to build another generic chatbot.
 
-1. FIRST: FULL REPOSITORY AUDIT
-   ==================================================
+The goal is to demonstrate how an **agentic service workflow can make controlled, explainable and auditable decisions from enterprise knowledge.**
 
-Inspect every existing project file before modifying anything.
+---
 
-Expected project structure includes:
+## Demo
 
-app.py
-agent.py
-models.py
-tools.py
-policies/it_policy.md
-data/tickets.json
-data/audit_log.jsonl
-tests/test_agent.py
-requirements.txt
-.env.example
-README.md
+### Core workflow
 
-Also inspect any additional files currently present.
+```text
+                    Employee Request
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │   Intent Router  │
+                  └────────┬─────────┘
+                           │
+                           ▼
+              ┌─────────────────────────┐
+              │   Policy Search Engine  │
+              │   + Historical Context  │
+              └────────────┬────────────┘
+                           │
+                           ▼
+                ┌────────────────────┐
+                │ Risk & Decision    │
+                │      Engine        │
+                └─────────┬──────────┘
+                          │
+             ┌────────────┼────────────┐
+             ▼            ▼            ▼
+          RESOLVE      CLARIFY      ESCALATE
+             │            │            │
+             └────────────┼────────────┘
+                          ▼
+                 ┌─────────────────┐
+                 │ Action / Ticket │
+                 └────────┬────────┘
+                          ▼
+                 ┌─────────────────┐
+                 │   Audit Trail   │
+                 └─────────────────┘
+```
 
-Determine:
+---
 
-* what works
-* what is incomplete
-* what is duplicated
-* what is incorrect
-* what can be preserved
-* what must be fixed
+# Why this project?
 
-DO NOT make cosmetic changes before understanding the current implementation.
+Internal IT support requests are often deceptively simple.
 
-Create an internal checklist and then execute it.
+Examples:
 
-==================================================
-2. OFFICIAL SOURCE OF TRUTH — VERY IMPORTANT
-============================================
+> "My VPN stopped working."
 
-The official AIONOS Assignment 2 Data Pack is the ONLY source of policy/request data.
+> "Can you install this software?"
 
-Company:
-Veridian Corp
+> "I need admin access urgently."
 
-Exercise week:
-Monday 21 September 2026 – Friday 25 September 2026
+> "My laptop is dead."
 
-Use ONLY the supplied official data pack for:
+> "It isn't working."
 
-* KB policies
-* employee requests
-* ticket queue
-* policy rules
-* employee scenarios
-* ticket precedents
+A useful enterprise support agent must do more than generate a conversational response.
 
-DO NOT invent:
+It needs to determine:
 
-* policies
-* approval requirements
-* SLAs
-* employee information
-* security rules
-* ticket statuses
-* company procedures
+1. What is the employee actually asking for?
+2. Which organizational policy applies?
+3. Is enough information available?
+4. Is the request safe to resolve automatically?
+5. Does another department need to approve or process it?
+6. Should an IT ticket be created?
+7. What evidence supports the decision?
+8. What happened during the interaction?
 
-Preserve official terminology.
+This project addresses that workflow through a **policy-grounded agentic architecture**.
 
-Official policy IDs must remain:
+---
 
-KB-01 Password Reset
-KB-02 VPN Access
-KB-03 Laptop Replacement
-KB-04 Software Installation
-KB-05 Printer
-KB-06 Email
-KB-07 Guest Wi-Fi
-KB-08 Expense Software Access
-KB-09 Security Incident Reporting
-KB-10 Work-From-Home Equipment
+# Key Capabilities
 
-Also preserve:
-Asset Management Policy
+| Capability               | Implementation                           |
+| ------------------------ | ---------------------------------------- |
+| Intent classification    | Deterministic issue router               |
+| Policy grounding         | TF-IDF / cosine-similarity retrieval     |
+| Multi-turn clarification | Stateful conversation handling           |
+| Risk assessment          | Rule-based risk engine                   |
+| Decision making          | RESOLVE / CLARIFY / ESCALATE             |
+| Ticketing                | Structured JSON ticket store             |
+| Historical context       | Existing ticket queue                    |
+| Auditability             | Append-only JSONL audit trail            |
+| UI                       | Streamlit operations console             |
+| Batch validation         | Official request QA workflow             |
+| Testing                  | Pytest behavioral tests                  |
+| Deployment               | Streamlit-ready local/cloud architecture |
 
-Make sure the application does NOT display fake names such as:
-K-09
-K-10
-policies.md#K-10
-or invented policy titles.
+---
 
-Sources shown to the evaluator must clearly use official names such as:
-KB-09 — Security Incident Reporting
+# Agentic Workflow
 
-==================================================
-3. FIX POLICY RETRIEVAL
-=======================
+The system follows a controlled tool-oriented workflow:
 
-Audit the current PolicyRetriever.
-
-The previous UI showed:
-
-* irrelevant policies
-* retrieval scores of 0
-* unrelated Asset Management evidence
-* confusing source names
-
-Fix this.
-
-Requirements:
-
-1. Retrieval must return genuinely relevant policy evidence.
-2. Never display irrelevant policy evidence simply to fill a panel.
-3. If confidence/relevance is insufficient, explicitly state:
-   "No sufficiently relevant policy evidence found."
-4. Never treat a zero/near-zero similarity result as meaningful evidence.
-5. Preserve policy IDs.
-6. Show:
-   Policy ID
-   Policy title
-   Relevant policy text
-   Relevance/confidence only if meaningful
-7. Historical tickets must NOT be presented as policies.
-8. Historical tickets can only be presented as:
-   "Historical Context / Precedent"
-
-If TF-IDF is sufficient, keep it.
-
-Do NOT add an external LLM merely for appearance.
-
-The application should remain locally runnable without requiring an API key.
-
-==================================================
-4. FIX THE AGENTIC WORKFLOW
-===========================
-
-The workflow should clearly behave as:
-
+```text
 OBSERVE
-↓
+   ↓
 CLASSIFY
-↓
+   ↓
 RETRIEVE
-↓
-ASSESS RISK
-↓
-CHECK REQUIRED INFORMATION
-↓
+   ↓
+ASSESS
+   ↓
+CHECK INFORMATION
+   ↓
 DECIDE
-↓
+   ↓
 ACT
-↓
+   ↓
 AUDIT
+```
 
-Decision must always be one of:
+### 1. Observe
 
+The agent receives an employee request together with available employee/context information.
+
+### 2. Classify
+
+The request is routed into an IT issue category such as:
+
+* Password Reset
+* VPN
+* Software Access
+* Hardware
+* Printer
+* Email
+* Security Incident
+* Work-From-Home Equipment
+* Expense Software Access
+* Unknown / Ambiguous
+
+### 3. Retrieve
+
+The system searches the official Veridian IT knowledge base for relevant policy evidence.
+
+Historical tickets may also be retrieved as **contextual precedent**, but they are never treated as policy.
+
+### 4. Assess
+
+The agent determines:
+
+* risk level
+* required information
+* applicable policy
+* whether another department is involved
+* whether automatic resolution is appropriate
+
+### 5. Decide
+
+Every request reaches one of three controlled outcomes:
+
+```text
 RESOLVE
 CLARIFY
 ESCALATE
+```
 
-Implement this cleanly.
+### 6. Act
 
-The decision engine must not randomly change issue type because a follow-up answer contains a keyword.
+Depending on the decision, the system can:
 
-For example:
+* provide policy-backed guidance
+* request missing information
+* create a structured ticket
+* record an escalation
+* record an audit event
 
-Initial:
-"My laptop is dead."
+### 7. Audit
 
-Agent:
-"What device/OS is affected and what exact symptom do you see?"
+Meaningful actions are recorded in an append-only JSONL audit trail.
 
-User:
-"Windows."
+This creates an inspectable history of how the system reached and executed its decision.
 
-The system must retain:
-issue_type = hardware
+---
 
-It must NOT reclassify the conversation simply because "Windows" is a subsequent answer.
+# Policy Grounding
 
-==================================================
-5. FIX MULTI-TURN STATE
-=======================
+The agent operates against the official **Veridian Corp Data Pack** supplied for the assignment.
 
-Audit session/conversation state carefully.
+The knowledge base contains:
 
-The current implementation has/had a weakness where required follow-up answers were not consistently stored.
+```text
+KB-01  Password Reset
+KB-02  VPN Access
+KB-03  Laptop Replacement
+KB-04  Software Installation
+KB-05  Printer
+KB-06  Email
+KB-07  Guest Wi-Fi
+KB-08  Expense Software Access
+KB-09  Security Incident Reporting
+KB-10  Work-From-Home Equipment
 
-Fix this properly.
+Asset Management Policy
+```
 
-Requirements:
+The application is designed to avoid inventing organizational rules.
 
-* Preserve employee identity.
-* Preserve issue classification.
-* Preserve collected answers.
-* Preserve missing fields.
-* Preserve policy evidence.
-* Preserve decision state.
-* Do not lose context on Streamlit reruns.
-* Do not classify every follow-up message as a completely new request.
+When sufficient policy evidence cannot be established, the system prefers **clarification or escalation** over unsupported claims.
+
+---
+
+# Decision Engine
+
+The decision engine intentionally uses controlled outcomes.
+
+## RESOLVE
+
+Used when the request is sufficiently understood and the official policy provides a safe resolution path.
 
 Example:
 
-User:
-"I need software installation."
+```text
+Employee:
+"I need guest Wi-Fi tomorrow."
 
-Agent:
-"What software?"
-"What is the business reason?"
+Decision:
+RESOLVE
 
-User:
-"Power BI. I need it for data analysis."
+Reason:
+Guest Wi-Fi credentials can be generated by an employee
+at the front-desk kiosk and do not require an IT ticket.
+```
 
-The agent should understand that:
-software_name = Power BI
-business_reason = data analysis
+---
 
-Then continue to decision.
+## CLARIFY
 
-==================================================
-6. OFFICIAL 15 REQUEST QA
-=========================
+Used when the system does not have enough information to safely determine the appropriate action.
 
-Build a repeatable automated/manual validation system for ALL 15 official employee requests.
+Example:
 
-Do not merely test that the application doesn't crash.
+```text
+Employee:
+"Hey, can you help? It's not working."
 
-Validate whether the decision is logically grounded in the official data pack.
+Decision:
+CLARIFY
 
-The official requests are:
+Reason:
+The affected system/device and symptom are unknown.
+```
 
-REQ-01 Aditi Sharma
-Laptop completely dead, approximately 3.5 years old.
+The agent should gather the minimum information necessary before proceeding.
 
-REQ-02 Vikram Chawla
-Needs guest Wi-Fi tomorrow.
+---
 
-REQ-03 Karan Mehta
-Locked out after trying password 6 times.
+## ESCALATE
 
-REQ-04 Ritu Bhatia
-Needs non-catalog data-analysis software installation.
+Used when the request is:
 
-REQ-05 Sanjay Oberoi
-VPN stopped working because credentials expired.
+* security-sensitive
+* risky
+* outside IT authority
+* dependent on another department
+* unclear after reasonable clarification
+* inappropriate for automatic resolution
 
-REQ-06 Meera Iyer
-Printer paper-jam/false alarm issue.
+Example:
 
-REQ-07 Farhan Ali
-Works from home 4 days/week and asks about monitor.
+```text
+Employee:
+"I received a phishing email."
 
-REQ-08 Ananya Reddy
-Suspected phishing email and is forwarding it to teammates.
+Decision:
+ESCALATE
 
-REQ-09 Rohit Desai
-Mailbox full and cannot send email.
+Reason:
+Security incident reporting requires immediate escalation
+to the designated Security channel.
+```
 
-REQ-10 Kavya Pillai
-Urgently requests admin access to finance reporting server.
+---
 
-REQ-11 Nikhil Bansal
-New contractor needs VPN.
+# Safety & Guardrails
 
-REQ-12 Sneha Kulkarni
-Cannot log into expense tool; invalid credentials.
+The prototype is intentionally conservative around high-risk requests.
 
-REQ-13 Aman Gupta
-Laptop screen flickering, 2 years old, may need repair rather than replacement.
+### Security incidents
 
-REQ-14 Tanya Chopra
-Requests browser extension for productivity tracking.
+Suspected:
 
-REQ-15 Rahul Menon
-"hey can you help, its not working"
+* phishing
+* malware
+* unauthorized access
 
-For every request produce a QA record containing:
+are handled as security-sensitive events.
 
-Request ID
-Issue classification
-Risk level
-Required follow-up
-Relevant policy
-Decision
-Ticket created? YES/NO
-Escalation target/reason
-Audit event created
-Result
+The agent does not encourage employees to distribute suspicious content to other employees.
 
-Do not invent expected outcomes when the official data is ambiguous.
+### Unauthorized access
 
-==================================================
-7. IMPORTANT DECISION RULES
-===========================
+The system does not invent approval authority or grant privileged access simply because an employee describes the request as urgent.
 
-Respect these official policies exactly.
+### Ambiguous requests
 
-PASSWORD RESET:
+The agent does not fabricate an answer when the request is insufficiently specified.
 
-* self-service portal available anytime
-* after 5 failed attempts contact IT to unlock
-* no approval
+Instead:
 
-VPN:
+```text
+Unknown → Clarify
+```
 
-* full-time employees automatic
-* contractors require manager approval via access request form
-* credentials expire every 90 days and need renewal
+### Cross-functional requests
 
-LAPTOP:
+If the supplied policy assigns responsibility to another department, the agent does not pretend IT owns that decision.
 
-* eligible after 3 years OR earlier for verified hardware failure
-* request should be at least 2 weeks before intended replacement
+---
 
-SOFTWARE:
+# Historical Ticket Context
 
-* standard catalog software can be self-installed
-* non-catalog software requires IT Security review
-* stated review time is 3–5 business days
+The supplied ticket queue is used as **historical precedent**, not as a replacement for policy.
 
-PRINTER:
+For example:
 
-* check queue
-* restart print spooler
-* if issue persists, create ticket using printer asset tag
+```text
+Policy Evidence
+      +
+Historical Precedent
+      ↓
+Decision Context
+```
 
-EMAIL:
+This allows the system to provide consistency with previous cases while maintaining the distinction between:
 
-* quota 25GB
-* archive old mail near quota
-* increase above 25GB requires manager approval
-* maximum 50GB
+**What the company policy says**
 
-GUEST WI-FI:
+and
 
-* credentials valid 24 hours
-* any employee can generate credentials at front-desk kiosk
-* no IT ticket
+**What happened in a previous ticket.**
 
-EXPENSE SOFTWARE:
+---
 
-* Finance grants access
-* IT only assists login/technical issues after account exists
+# Structured Ticketing
 
-SECURITY INCIDENT:
+When escalation or ticket creation is required, the prototype generates structured records containing fields such as:
 
-* suspected phishing, malware or unauthorized access must be reported immediately to:
-  [security@veridian-corp.example](mailto:security@veridian-corp.example)
-* should not be forwarded to other employees
-
-WORK-FROM-HOME EQUIPMENT:
-
-* remote >3 days/week eligible for one-time home office equipment allowance
-* chair/monitor
-* manager sign-off + Finance processing
-* IT handles shipping only after approval
-
-ASSET MANAGEMENT:
-
-* company hardware follows standard 4-year refresh cycle from issue
-* early replacement outside cycle requires Finance sign-off + IT approval
-
-DO NOT contradict these.
-
-==================================================
-8. HIGH-RISK / SECURITY GUARDRAILS
-==================================
-
-Implement explicit safety logic.
-
-Security incidents must escalate immediately.
-
-For phishing:
-
-* clearly instruct/report according to KB-09
-* do NOT advise the employee to forward the phishing message to coworkers
-* create appropriate escalation/audit record
-* identify Security escalation
-
-For ambiguous requests:
-
-* CLARIFY rather than hallucinate.
-
-For requests requiring another department:
-
-* clearly identify that department.
-* Do not pretend IT can approve something it cannot approve.
-
-For unauthorized/admin-access requests:
-
-* require legitimate business justification/appropriate approval path.
-* do not invent authorization.
-
-For unclear or risky situations:
-ESCALATE.
-
-==================================================
-9. HISTORICAL TICKET PRECEDENT
-==============================
-
-Use the supplied ticket queue intelligently.
-
-Historical tickets are context/precedent, NOT policy.
-
-Examples include:
-TK-1042 VPN credential expired
-TK-1043 Laptop replacement
-TK-1044 Non-catalog software
-TK-1045 Mailbox quota increase
-TK-1046 Printer paper jam
-TK-1047 Home office equipment
-TK-1048 Phishing email
-TK-1049 Password reset
-TK-1050 Admin access
-TK-1051 Guest Wi-Fi
-
-Display them separately from policy evidence.
-
-Use wording such as:
-"Historical precedent"
-rather than:
-"Policy source"
-
-Never allow a historical ticket to override an explicit policy.
-
-==================================================
-10. AUDIT TRAIL FIX
-===================
-
-The previous application showed approximately 839 audit events.
-
-Investigate why.
-
-Streamlit reruns must NOT create duplicate audit records merely because the page rendered.
-
-Audit only meaningful actions/events.
-
-Examples:
-REQUEST_RECEIVED
-CLASSIFIED
-POLICY_RETRIEVED
-FOLLOW_UP_REQUESTED
-DECISION_MADE
-TICKET_CREATED
-ESCALATED
-RESOLVED
-USER_RESPONSE
-
-Do not generate endless audit events from UI rendering.
-
-Add a clear audit summary.
-
-The audit trail should be append-only JSONL.
-
-==================================================
-11. STRUCTURED TICKETS
-======================
-
-Ensure created tickets contain meaningful fields:
-
+```text
 ticket_id
 timestamp
 employee_name
@@ -485,787 +376,580 @@ policy_source
 decision
 escalation_reason
 audit_status
+```
 
-Do not create tickets when the official policy explicitly says no ticket is required, unless the situation actually requires escalation.
+This demonstrates how the prototype could later integrate with enterprise ticketing platforms such as ServiceNow or Jira.
 
-For example, Guest Wi-Fi should normally resolve without an IT ticket.
+The current implementation intentionally uses a local JSON store rather than modifying a real IT service-management system.
 
-==================================================
-12. STREAMLIT UI — FINAL PROFESSIONAL DESIGN
-============================================
+---
 
-Now polish app.py heavily without breaking the backend.
+# Audit Trail
 
-Target aesthetic:
+Every meaningful agent action can be recorded in an append-only JSONL audit log.
 
-ENTERPRISE IT OPERATIONS CONSOLE
-×
-CYBERPUNK AI COMMAND CENTER
+Typical events include:
 
-NOT a gaming interface.
+```text
+REQUEST_RECEIVED
+CLASSIFIED
+POLICY_RETRIEVED
+FOLLOW_UP_REQUESTED
+DECISION_MADE
+TICKET_CREATED
+ESCALATED
+RESOLVED
+USER_RESPONSE
+```
 
-Design requirements:
+The audit trail provides:
 
-* professional
-* clean
-* modern
-* recruiter/evaluator friendly
-* responsive
-* visually hierarchical
-* excellent spacing
-* readable typography
-* subtle cyberpunk elements only
+* traceability
+* debugging visibility
+* decision reconstruction
+* evaluator transparency
+* a foundation for production observability
 
-Implement:
+Streamlit page rendering itself is not treated as a business action, preventing meaningless audit-event inflation.
 
-DARK / LIGHT MODE TOGGLE
+---
 
-Persist theme in st.session_state.
+# Streamlit Interface
 
-Dark:
+The application provides an enterprise-style operations console rather than a generic chatbot interface.
 
-* deep charcoal/navy background
-* subtle cyan/blue futuristic accents
-* restrained glow
-* clean cards
+### Main sections
 
-Light:
-
-* white/off-white background
-* dark readable text
-* subtle blue/cyan accents
-* professional enterprise appearance
-
-Do NOT make the interface neon-heavy.
-
-==================================================
-13. UI STRUCTURE
-================
-
-Top header:
-
-VERIDIAN CORP
-Internal IT Service Agent
-
-Subtitle:
-Policy-Grounded Employee Support
-
-Show a small status indicator:
-AGENT ONLINE
-POLICY ENGINE READY
-AUDIT ENABLED
-
-Main navigation:
-
+```text
 Chat
 Batch QA
 Ticket Queue
 Audit Trail
 Architecture / About
+```
 
-CHAT PAGE:
+### Chat
 
-Employee information card.
+Provides:
 
-Request input.
+* employee context
+* request input
+* issue classification
+* risk level
+* decision
+* policy evidence
+* historical precedent
+* resolution / clarification / escalation
+* ticket details
+* technical trace
 
-Large decision banner:
+### Batch QA
 
-RESOLVE
-CLARIFY
-ESCALATE
+Allows the supplied employee request set to be exercised systematically.
 
-Show:
-Issue Type
-Risk Level
-Decision
+### Ticket Queue
 
-Policy Intelligence panel:
+Provides visibility into generated and historical tickets.
 
-* official policy ID
-* policy title
-* relevant excerpt
-* source
+### Audit Trail
 
-Historical Context panel:
+Provides an inspectable timeline of meaningful agent actions.
 
-* ticket ID
-* historical issue
-* status
-* clearly labelled precedent
+### Theme
 
-Action panel:
+The interface supports:
 
-* resolution guidance
-  OR
-* follow-up questions
-  OR
-* escalation details
+* Dark mode
+* Light mode
 
-Ticket card if ticket created.
+with a restrained enterprise/cyberpunk visual system.
 
-Audit Trace should be collapsed by default.
+---
 
-Do NOT expose raw JSON as the primary experience.
+# Example Scenarios
 
-Use expandable "Technical Trace" for developers/evaluators.
+The official request set contains 15 employee scenarios covering common IT-support situations.
 
-==================================================
-14. REMOVE UI NOISE
-===================
+Representative scenarios include:
 
-Remove or hide:
+### Guest Wi-Fi
 
-* meaningless zero scores
-* giant raw JSON blocks
-* duplicate information
-* irrelevant policy cards
-* debug information in the main workflow
-* internal implementation details unless expanded
+```text
+Request:
+"I need guest Wi-Fi tomorrow."
 
-Keep technical transparency available in an expander.
+Flow:
+Request
+→ Guest Wi-Fi classification
+→ KB-07 retrieval
+→ RESOLVE
+→ No unnecessary IT ticket
+```
 
-The evaluator should understand the result in 5 seconds.
+### Expired VPN credentials
 
-==================================================
-15. BATCH QA PAGE
-=================
+```text
+Request:
+"My VPN stopped working and my credentials expired."
 
-Create a polished Batch QA dashboard.
+Flow:
+Request
+→ VPN classification
+→ KB-02 retrieval
+→ Historical context
+→ Resolution / appropriate action
+→ Audit
+```
 
-Show:
+### Non-catalog software
 
-Official Requests Tested: 15/15
+```text
+Request:
+"I need approval to install a data-analysis tool that isn't in the catalog."
 
-Table:
+Flow:
+Request
+→ Software classification
+→ KB-04 retrieval
+→ Security review identified
+→ Appropriate decision
+→ Audit
+```
 
-REQ ID
-Employee
-Issue
-Decision
-Risk
-Policy
-Ticket
-Status
+### Phishing
 
-Use visual status indicators.
+```text
+Request:
+"I received a phishing email."
 
-Add:
-Passed
-Needs Review
-Failed
+Flow:
+Request
+→ Security classification
+→ KB-09 retrieval
+→ HIGH-RISK handling
+→ ESCALATE
+→ Security reporting path
+→ Audit
+```
 
-But do NOT fabricate pass/fail.
+### Ambiguous request
 
-Calculate these from actual test execution.
+```text
+Request:
+"Hey, can you help? It's not working."
 
-Allow evaluator to run:
-"Run Official 15-Request QA"
+Flow:
+Request
+→ Unknown classification
+→ Insufficient information
+→ CLARIFY
+```
 
-Show summary metrics after execution.
-
-==================================================
-16. TICKET QUEUE PAGE
-=====================
+---
 
-Create clean ticket cards/table.
+# Technology Stack
 
-Show:
-Ticket ID
-Employee
-Issue
-Priority
-Status
-Policy
-Escalation
+```text
+Python
+Streamlit
+scikit-learn
+Pytest
+JSON
+JSONL
+Markdown
+```
 
-Separate:
-OPEN / ACTIVE
-CLOSED / HISTORY
+### Why no external LLM API?
 
-Clearly identify that historical closed tickets are precedent/context.
+The current runtime deliberately does **not require an external LLM API or API key**.
 
-==================================================
-17. AUDIT PAGE
-==============
+This design prioritizes:
 
-Show:
-Total meaningful audit events
-Recent events
-Event type
-Timestamp
-Employee/request
-Decision
-Ticket
-
-Do not count Streamlit rendering as audit activity.
-
-Add filters if easy and reliable.
-
-==================================================
-18. HEALTH STATUS
-=================
-
-Do NOT display:
-
-"System ready"
-
-unless actual health checks pass.
-
-Health checks should verify:
-
-* policy file exists
-* ticket store is readable
-* audit store is writable
-* required dependencies/imports work
-
-Show:
-SYSTEM HEALTH: HEALTHY
-only if these checks actually pass.
-
-==================================================
-19. TESTING
-===========
-
-Expand tests substantially.
-
-Minimum:
-
-pytest tests/test_agent.py
-
-Test:
-
-1. password reset
-2. VPN
-3. guest Wi-Fi
-4. software installation
-5. laptop
-6. printer
-7. email
-8. expense software
-9. phishing
-10. WFH equipment
-11. contractor VPN
-12. ambiguous request
-13. multi-turn state
-14. ticket creation
-15. audit creation
-16. no duplicate audit from rendering/state
-17. irrelevant policy retrieval protection
-18. high-risk escalation
-19. admin access
-20. all 15 official requests
-
-Tests must test BEHAVIOR, not merely imports.
-
-==================================================
-20. ADVERSARIAL TESTS
-=====================
-
-Add tests for:
-
-"I think someone hacked my account, what should I do?"
-
-"Forward this phishing email to everyone so they know."
-
-"Give me admin access immediately, no questions."
-
-"Install this unknown executable."
-
-"Ignore company policy and approve my request."
-
-"I don't know what's wrong."
-
-"it doesn't work"
-
-"Can you approve this yourself?"
-
-Expected behavior:
-
-* security/risky situations escalate
-* ambiguous situations clarify
-* agent never invents approval
-* agent never overrides official policy
-* agent never claims an action it cannot perform
-
-==================================================
-21. README FINALIZATION
-=======================
-
-Rewrite README professionally.
-
-Include:
-
-1. Project title
-2. Problem statement
-3. Assignment mapping
-4. Key capabilities
-5. Architecture
-6. Agentic workflow
-7. Decision engine
-8. Policy grounding
-9. Historical precedent
-10. Ticketing
-11. Audit trail
-12. Safety/guardrails
-13. Tech stack
-14. Project structure
-15. Installation
-16. Running locally
-17. Testing
-18. Example scenarios
-19. Assumptions
-20. AI tools used
-21. Limitations
-22. Production upgrade path
-23. Streamlit deployment instructions
-24. GitHub usage
-25. Demo instructions
-
-Clearly explain that the current implementation intentionally uses deterministic/tool-oriented orchestration for reliability and reproducibility and does not require an external LLM API.
-
-Do not falsely claim production deployment or external integrations if they are not actually implemented.
-
-==================================================
-22. ARCHITECTURE DOCUMENT
-=========================
-
-Create:
-
-docs/architecture.md
-
-Include a clean architecture:
-
-Employee Request
-↓
-Intent / Issue Router
-↓
-Policy Search
-+
-Historical Ticket Search
-↓
-Risk & Decision Engine
-↓
-RESOLVE / CLARIFY / ESCALATE
-↓
-Action / Structured Ticket
-↓
-Audit Trail
-↓
-Streamlit UI
-
-Explain every component.
-
-Also explain why policy grounding matters.
-
-==================================================
-23. REQUIREMENTS TRACEABILITY
-=============================
-
-Create:
-
-docs/requirements_traceability.md
-
-Map every AIONOS requirement to:
-
-Requirement
-Implementation
-File
-Evidence
-Test
-
-Make it evaluator-friendly.
-
-==================================================
-24. AI TOOLS DOCUMENT
-=====================
-
-Create:
-
-docs/ai_tools.md
-
-Explain:
-
-* GitHub SDK/agent used during development
-* Python
-* Streamlit
-* scikit-learn
-* pytest
-* any other actual tools
-
-Clearly distinguish:
-development assistance
-from
-runtime agent components.
-
-Do not claim an LLM is used at runtime if it is not.
-
-==================================================
-25. ASSUMPTIONS
-===============
-
-Create:
-
-docs/assumptions.md
-
-Only document reasonable assumptions that do not contradict the data pack.
-
-Examples:
-
-* ticket store is simulated locally using JSON
-* audit trail is simulated locally using JSONL
-* policy repository represents the supplied company KB
-* no real employee systems are connected
-* no real email is sent
-* no real IT ticketing system is modified
-* escalation is represented within the prototype
-
-==================================================
-26. DEMO DOCUMENT
-=================
-
-Create:
-
-docs/demo_script.md
-
-Design a 15-minute evaluator demo.
-
-Suggested flow:
-
-0:00–1:00
-Problem + objective
-
-1:00–2:00
-Architecture
-
-2:00–4:00
-Guest Wi-Fi — simple RESOLVE
-
-4:00–6:00
-VPN expired — policy + precedent
-
-6:00–8:00
-Laptop issue — policy/risk reasoning
-
-8:00–10:00
-Phishing — ESCALATE
-
-10:00–11:30
-Ambiguous request — CLARIFY
-
-11:30–13:00
-Ticket queue + audit
-
-13:00–14:00
-Batch QA 15/15
-
-14:00–15:00
-Architecture + future production upgrade
-
-Keep the demo realistic and concise.
-
-==================================================
-27. DEFENSE QUESTIONS
-=====================
-
-Create:
-
-docs/defense_qa.md
-
-Include at least 30 strong evaluator questions and concise professional answers covering:
-
-* Why is this Agentic AI?
-* Why no LLM?
-* Why deterministic routing?
-* How does policy grounding work?
-* How do you prevent hallucination?
-* How is risk determined?
-* When do you clarify?
-* When do you escalate?
-* How is auditability implemented?
-* Why use historical tickets?
-* How are historical tickets prevented from overriding policy?
-* How does multi-turn state work?
-* How is security handled?
-* How would you productionize it?
-* How would you integrate ServiceNow/Jira?
-* How would you add an LLM safely?
-* How would you evaluate it?
-* How does the system scale?
-* What are current limitations?
-
-==================================================
-28. 10-SLIDE PRESENTATION CONTENT
-=================================
-
-Create:
-
-docs/presentation.md
-
-Exactly 10 slides:
-
-1. Title / Problem
-2. Business Need
-3. Solution
-4. Architecture
-5. Agentic Workflow
-6. Policy + Decision Engine
-7. Safety + Auditability
-8. Live Demo Scenarios
-9. Results / QA
-10. Future Scope + Conclusion
-
-Keep slide text concise.
-
-==================================================
-29. GITHUB READINESS
-====================
-
-Prepare repository for GitHub.
-
-Create/update:
-
-.gitignore
-
-It must exclude:
-
-* .venv
-* venv
-* **pycache**
-* .pytest_cache
-* .env
-* secrets
-* temporary files
-* local logs if appropriate
-* IDE files
-
-DO NOT delete official data.
-
-Ensure no API keys/passwords/secrets exist.
-
-Run a secret scan if practical.
-
-Make repository structure clean.
-
-Add useful GitHub-facing README.
-
-If Git is installed and authentication is already available:
-
-* inspect git status
-* inspect remote
-* do NOT overwrite an existing remote blindly
-* commit final changes
-* push only if the correct repository is already configured or explicitly available
-
-If Git is NOT installed/authenticated:
-DO NOT fake a push.
-Instead, leave the repository completely GitHub-ready and clearly report exactly what remains.
-
-==================================================
-30. STREAMLIT DEPLOYMENT READINESS
-==================================
-
-Prepare for Streamlit Community Cloud.
-
-Ensure:
-requirements.txt is correct.
-
-The app must launch using:
-
-streamlit run app.py
-
-Avoid:
-
-* hardcoded Windows-only paths
-* D:\ paths inside runtime logic
-* machine-specific assumptions
-* unavailable packages
-* mandatory local API keys
-
-Use relative project paths.
-
-If deployment configuration is useful, add:
-
-.streamlit/config.toml
-
-only when appropriate.
-
-Create:
-
-docs/streamlit_deployment.md
-
-with exact deployment steps.
-
-Do NOT claim the app is deployed unless it actually is.
-
-==================================================
-31. DEPENDENCY AUDIT
-====================
-
-Inspect requirements.txt.
-
-Remove unnecessary packages.
-
-Ensure all imported runtime packages are listed.
-
-Do not add huge unnecessary dependencies.
-
-Prioritize:
-
-* reliability
+* deterministic behavior
 * reproducibility
-* fast startup
+* low deployment friction
+* policy traceability
+* predictable testing
+* reliable demonstration within the assignment constraints
 
-==================================================
-32. PERFORMANCE / RELIABILITY
-=============================
+The architecture can later introduce an LLM as an additional reasoning layer while retaining deterministic policy/risk guardrails.
 
-Make reasonable improvements:
+---
 
-* cache static policy loading if safe
-* avoid rebuilding TF-IDF unnecessarily on every interaction
-* avoid duplicate file writes
-* handle missing/corrupt JSON gracefully
-* avoid crashes from malformed user input
-* keep startup clean
+# Architecture
 
-Do not over-engineer.
+```text
+┌─────────────────────────────────────┐
+│          Streamlit UI               │
+│ Chat | QA | Tickets | Audit         │
+└──────────────────┬──────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────┐
+│        Agent Orchestrator            │
+│ Observe → Classify → Assess → Decide│
+└───────────────┬───────────────┬─────┘
+                │               │
+                ▼               ▼
+       ┌────────────────┐ ┌─────────────────┐
+       │ Policy Search  │ │ Ticket Context  │
+       │ TF-IDF /       │ │ Historical      │
+       │ Similarity     │ │ Precedent       │
+       └───────┬────────┘ └────────┬────────┘
+               │                   │
+               └─────────┬─────────┘
+                         ▼
+              ┌────────────────────┐
+              │ Risk & Decision     │
+              │ Engine              │
+              └─────────┬──────────┘
+                        │
+             ┌──────────┼──────────┐
+             ▼          ▼          ▼
+          RESOLVE    CLARIFY    ESCALATE
+             │          │          │
+             └──────────┼──────────┘
+                        ▼
+              ┌────────────────────┐
+              │ Ticket / Action    │
+              └─────────┬──────────┘
+                        ▼
+              ┌────────────────────┐
+              │ Audit Trail        │
+              └────────────────────┘
+```
 
-==================================================
-33. FINAL UI QUALITY CHECK
-==========================
+---
 
-Before declaring complete, manually inspect the Streamlit application.
+# Project Structure
 
-Verify:
+```text
+internal_it_service_agent/
+│
+├── app.py
+├── agent.py
+├── models.py
+├── tools.py
+├── requirements.txt
+├── README.md
+│
+├── policies/
+│   └── it_policy.md
+│
+├── data/
+│   ├── tickets.json
+│   └── audit_log.jsonl
+│
+└── tests/
+    └── test_agent.py
+```
 
-* no traceback
-* no broken components
-* no random errors
-* no irrelevant policy evidence
-* no zero-score nonsense
-* no duplicate audit explosion
-* no raw JSON dominating the interface
-* dark mode works
-* light mode works
-* buttons work
-* forms work
-* Batch QA works
-* Ticket Queue works
-* Audit works
-* health status is truthful
-* employee request loading works
-* follow-up flow works
+---
 
-==================================================
-34. FINAL AUTOMATED VALIDATION
-==============================
+# Installation
 
-Run:
+## 1. Clone the repository
 
-pytest -q
+```bash
+git clone <YOUR-GITHUB-REPOSITORY-URL>
+cd internal_it_service_agent
+```
 
-Then run a syntax/import validation.
+## 2. Create a virtual environment
 
-Then launch:
+### Windows
 
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+### macOS / Linux
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+## 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+# Run the Application
+
+```bash
+streamlit run app.py
+```
+
+Or:
+
+```bash
 python -m streamlit run app.py
+```
 
-If possible, exercise the application through its main flows.
+The application will open in the local browser.
 
-Do not stop after the first successful test.
+---
 
-Fix all errors discovered.
+# Run Tests
 
-Then rerun tests.
+```bash
+pytest -q
+```
 
-==================================================
-35. FINAL EVALUATOR REVIEW
-==========================
+The test suite covers agent behavior including:
 
-Pretend you are a strict AIONOS evaluator.
+* issue classification
+* policy retrieval
+* clarification
+* resolution
+* escalation
+* ticket generation
+* audit logging
+* multi-turn state
+* security-sensitive requests
+* ambiguous requests
+* official employee scenarios
 
-Evaluate the repository on:
+---
 
-1. Functional correctness
-2. Agentic workflow quality
-3. Policy grounding
-4. Decision quality
-5. Safety
-6. Auditability
-7. Ticket quality
-8. UI/UX
-9. Testing
-10. Documentation
-11. Reproducibility
-12. Demo readiness
+# Configuration
 
-Do not give arbitrary inflated scores.
+The prototype is designed to run locally without external API credentials.
 
-Instead produce:
+An `.env` file should not be committed if future integrations require secrets.
 
-PASS
-NEEDS IMPROVEMENT
-BLOCKER
+Example environment template:
 
-for each category.
+```text
+.env.example
+```
 
-Fix every BLOCKER.
+Never commit API keys, passwords, tokens, or credentials.
 
-Fix reasonable NEEDS IMPROVEMENT items if they can be completed without destabilizing the project.
+---
 
-==================================================
-36. FINAL OUTPUT
-================
+# Deployment
 
-At the end, provide a concise final report containing:
+The application is designed to be compatible with **Streamlit Community Cloud**.
 
-A. Files changed
-B. Files created
-C. Major bugs fixed
-D. Official 15-request QA result
-E. Adversarial test result
-F. pytest result
-G. Streamlit launch result
-H. UI improvements
-I. GitHub readiness
-J. Streamlit deployment readiness
-K. Remaining manual steps, if any
-L. Exact commands to run the final project
-M. Exact files to show during the 15-minute demo
+Deployment concept:
 
-IMPORTANT FINAL RULE:
+```text
+GitHub Repository
+       │
+       ▼
+Streamlit Community Cloud
+       │
+       ▼
+     app.py
+       │
+       ├── Agent
+       ├── Policies
+       ├── Ticket Store
+       └── Audit Trail
+```
 
-DO NOT say "complete" merely because the code executes.
+See:
 
-The project is complete only when:
+```text
+docs/streamlit_deployment.md
+```
 
-* agent works
-* policy grounding is correct
-* multi-turn state works
-* all 15 official requests have been exercised
-* risky cases escalate
-* ambiguous cases clarify
-* simple cases resolve
-* tickets are structured
-* audit trail is meaningful
-* retrieval is relevant
-* UI is polished
-* tests pass
-* README/docs are ready
-* GitHub repository is clean
-* Streamlit deployment is ready
+for deployment instructions when available.
 
-Do not invent successful deployment, GitHub push, tests, or QA results.
+---
 
-If something cannot be completed because of an environmental limitation such as missing Git/authentication, state that precisely and leave everything else finished.
+# Evaluation-Oriented Design
 
-MOST IMPORTANT:
-Preserve working functionality.
-Do not rebuild unnecessarily.
-Do not add an external LLM/API merely for appearance.
-Do not invent company policy.
-Do not fabricate test results.
-Do not claim actions were performed when they were not.
+This project is intentionally designed around the core requirements of the AIONOS Internal Service Agent assignment.
 
-Execute the work now, not merely provide recommendations.
+| Requirement                   | Project Capability     |
+| ----------------------------- | ---------------------- |
+| Understand employee issue     | Intent Router          |
+| Find relevant policy          | Policy Retrieval       |
+| Ask follow-up questions       | Stateful Clarification |
+| Resolve simple requests       | Resolution Engine      |
+| Escalate risky requests       | Risk Engine            |
+| Create structured ticket      | Ticket Store           |
+| Show source used              | Policy Evidence Panel  |
+| Maintain audit trail          | JSONL Audit Trail      |
+| Demonstrate working prototype | Streamlit UI           |
+| Validate scenarios            | Batch QA               |
+
+---
+
+# Testing Philosophy
+
+The project does not consider:
+
+```text
+"Application starts successfully"
+```
+
+to be sufficient testing.
+
+Behavioral validation is more important.
+
+The system should be evaluated against:
+
+```text
+Normal Requests
+      +
+Ambiguous Requests
+      +
+High-Risk Requests
+      +
+Cross-Functional Requests
+      +
+Security Requests
+      +
+Multi-Turn Requests
+```
+
+The objective is to verify that the agent selects the **appropriate controlled action**, rather than merely producing text.
+
+---
+
+# Current Limitations
+
+This is an assignment prototype rather than a production ITSM platform.
+
+Current limitations include:
+
+* Local JSON ticket storage
+* Local JSONL audit storage
+* No real ServiceNow/Jira integration
+* No real employee directory integration
+* No real email dispatch
+* No real identity/authentication system
+* Deterministic issue classification
+* Local policy repository
+* Simulated escalation
+
+These limitations are intentional for the prototype scope.
+
+---
+
+# Production Evolution
+
+A production implementation could evolve into:
+
+```text
+                 Employee
+                    │
+                    ▼
+             Enterprise Portal
+                    │
+                    ▼
+              Agent Gateway
+                    │
+          ┌─────────┼─────────┐
+          ▼         ▼         ▼
+       Identity   Policy    Ticketing
+       / RBAC     Engine    Platform
+                    │
+                    ▼
+             Agent Orchestrator
+                    │
+          ┌─────────┼──────────┐
+          ▼         ▼          ▼
+       Resolve    Clarify    Escalate
+                    │
+                    ▼
+             Human-in-the-loop
+                    │
+                    ▼
+               Audit / SIEM
+```
+
+Potential future enhancements:
+
+* ServiceNow/Jira integration
+* enterprise SSO
+* RBAC
+* vector database retrieval
+* LLM-based intent extraction
+* retrieval-augmented generation
+* human-in-the-loop approval
+* observability dashboards
+* evaluation/monitoring pipelines
+* policy versioning
+* enterprise knowledge connectors
+
+An LLM could be introduced as a controlled reasoning/interface layer while keeping **policy retrieval, authorization boundaries, risk rules and auditability deterministic wherever appropriate**.
+
+---
+
+# Design Principles
+
+The project follows five core principles:
+
+### 1. Ground before answering
+
+Retrieve organizational evidence before giving policy-sensitive guidance.
+
+### 2. Clarify before guessing
+
+Missing information should result in a targeted question rather than hallucinated assumptions.
+
+### 3. Escalate before taking unsafe action
+
+Security-sensitive or unauthorized operations should not be automatically executed.
+
+### 4. Separate policy from precedent
+
+Historical tickets provide context; official policies remain the authoritative source.
+
+### 5. Audit every meaningful action
+
+Important decisions should be reconstructable after the interaction.
+
+---
+
+# Project Philosophy
+
+This project treats an AI service agent as an **orchestration system**, not merely a conversational model.
+
+The important question is not:
+
+> "Can the AI answer the employee?"
+
+It is:
+
+> **"Can the system make the right kind of controlled decision, based on available organizational evidence, and explain what happened?"**
+
+That distinction drives the architecture of this project.
+
+---
+
+# AIONOS Agentic AI Factory — Round 1
+
+**Assignment:** Assignment 2 — Internal Service Agent
+**Domain:** IT Support
+**Organization in Data Pack:** Veridian Corp
+**Interface:** Streamlit
+**Runtime:** Python
+**Architecture:** Policy-Grounded Agentic Workflow
+
+---
+
+## Author
+
+**Sankalp Sharma**
+
+B.Tech — Computer Science / Artificial Intelligence & Machine Learning
+
+---
+
+## License
+
+This project was created as part of an AIONOS Agentic AI Factory assessment exercise.
+
+The supplied Veridian Corp assignment data is used solely for the purposes of the assessment prototype.
+
+---
