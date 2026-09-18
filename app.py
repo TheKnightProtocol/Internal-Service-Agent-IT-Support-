@@ -1,8 +1,4 @@
-"""Veridian IT Service Agent — Streamlit UI (fully self-contained).
-
-Everything (policies, requests, ticket queue) is embedded below.
-No imports from agent/ package. No external data files required.
-"""
+"""Veridian IT Service Agent — Streamlit UI (fully self-contained)."""
 
 import json
 import re
@@ -14,9 +10,8 @@ import streamlit as st
 
 st.set_page_config(page_title="Veridian IT Service Agent", page_icon="🛠️", layout="wide")
 
-
 # ===========================================================================
-# DATAPACK — EMBEDDED (policies, requests, tickets)
+# DATAPACK — EMBEDDED
 # ===========================================================================
 POLICY_TEXT = """
 ## K-01: Password Reset
@@ -49,52 +44,48 @@ Any suspected phishing email, malware, or unauthorized access attempt must be re
 ## K-10: Work-From-Home Equipment
 Employees working remotely more than 3 days/week are eligible for a one-time home office equipment allowance (chair, monitor). Requires manager sign-off and Finance processing — IT only handles the equipment shipping request once approved.
 
-## Asset Management Policy (Extract)
-Issued by Finance & Assets, last updated Q2 2026. All company-issued hardware, including laptops and monitors, follows a standard 4-year refresh cycle from date of issue. Early replacement outside this cycle requires Finance sign-off in addition to IT approval.
-
-## CONFLICT RULE
-Between year 3 and year 4, laptop replacement requires BOTH IT eligibility AND Finance sign-off. Precedent: TK-1043 (S. Iyer, 3.2 yrs) approved after Finance sign-off.
+## Asset Mgmt
+Asset Management Policy (Finance & Assets, Q2 2026). All company-issued hardware follows a 4-year refresh cycle. Early replacement outside this cycle requires Finance sign-off in addition to IT approval.
 """
 
 REQUESTS = [
-    {"id": "REQ-01", "employee": "Aditi Sharma",   "email": "aditi.sharma@veridian-corp.example",   "text": "My laptop won't turn on at all, it's completely dead, had it about 3.5 years now."},
-    {"id": "REQ-02", "employee": "Vikram Chawla",  "email": "vikram.chawla@veridian-corp.example",  "text": "Can I get Wi-Fi access for a guest visiting our office tomorrow?"},
-    {"id": "REQ-03", "employee": "Karan Mehta",    "email": "karan.mehta@veridian-corp.example",    "text": "I'm locked out of my account, tried my password 6 times."},
-    {"id": "REQ-04", "employee": "Ritu Bhatia",    "email": "ritu.bhatia@veridian-corp.example",    "text": "Need approval to install a data-analysis tool that's not in the software catalog."},
-    {"id": "REQ-05", "employee": "Sanjay Oberoi",  "email": "sanjay.oberoi@veridian-corp.example",  "text": "My VPN stopped working this morning, says credentials expired."},
-    {"id": "REQ-06", "employee": "Meera Iyer",     "email": "meera.iyer@veridian-corp.example",     "text": "Printer on the 3rd floor keeps showing 'paper jam' even though there's no jam."},
-    {"id": "REQ-07", "employee": "Farhan Ali",     "email": "farhan.ali@veridian-corp.example",     "text": "I've started working from home 4 days a week, how do I get a monitor?"},
-    {"id": "REQ-08", "employee": "Ananya Reddy",   "email": "ananya.reddy@veridian-corp.example",   "text": "I think I got a phishing email asking for my login - forwarding it to a few teammates to check."},
-    {"id": "REQ-09", "employee": "Rohit Desai",    "email": "rohit.desai@veridian-corp.example",    "text": "My mailbox is full and I can't send emails."},
-    {"id": "REQ-10", "employee": "Kavya Pillai",   "email": "kavya.pillai@veridian-corp.example",   "text": "Can someone give me admin access to the finance reporting server? Need it urgently for month-end."},
-    {"id": "REQ-11", "employee": "Nikhil Bansal",  "email": "nikhil.bansal@veridian-corp.example",  "text": "New contractor joining my team next week, they'll need VPN access."},
-    {"id": "REQ-12", "employee": "Sneha Kulkarni", "email": "sneha.kulkarni@veridian-corp.example", "text": "I can't log into the expense tool, keeps saying invalid credentials."},
-    {"id": "REQ-13", "employee": "Aman Gupta",     "email": "aman.gupta@veridian-corp.example",     "text": "Laptop screen is flickering on and off, had it 2 years, might just need a fix not a replacement."},
-    {"id": "REQ-14", "employee": "Tanya Chopra",   "email": "tanya.chopra@veridian-corp.example",   "text": "Requesting approval to install a browser extension for productivity tracking."},
-    {"id": "REQ-15", "employee": "Rahul Menon",    "email": "rahul.menon@veridian-corp.example",    "text": "hey can you help, its not working"},
+    {"id": "REQ-01", "employee": "Aditi Sharma",   "text": "My laptop won't turn on at all, it's completely dead, had it about 3.5 years now."},
+    {"id": "REQ-02", "employee": "Vikram Chawla",  "text": "Can I get Wi-Fi access for a guest visiting our office tomorrow?"},
+    {"id": "REQ-03", "employee": "Karan Mehta",    "text": "I'm locked out of my account, tried my password 6 times."},
+    {"id": "REQ-04", "employee": "Ritu Bhatia",    "text": "Need approval to install a data-analysis tool that's not in the software catalog."},
+    {"id": "REQ-05", "employee": "Sanjay Oberoi",  "text": "My VPN stopped working this morning, says credentials expired."},
+    {"id": "REQ-06", "employee": "Meera Iyer",     "text": "Printer on the 3rd floor keeps showing 'paper jam' even though there's no jam."},
+    {"id": "REQ-07", "employee": "Farhan Ali",     "text": "I've started working from home 4 days a week, how do I get a monitor?"},
+    {"id": "REQ-08", "employee": "Ananya Reddy",   "text": "I think I got a phishing email asking for my login - forwarding it to a few teammates to check."},
+    {"id": "REQ-09", "employee": "Rohit Desai",    "text": "My mailbox is full and I can't send emails."},
+    {"id": "REQ-10", "employee": "Kavya Pillai",   "text": "Can someone give me admin access to the finance reporting server? Need it urgently for month-end."},
+    {"id": "REQ-11", "employee": "Nikhil Bansal",  "text": "New contractor joining my team next week, they'll need VPN access."},
+    {"id": "REQ-12", "employee": "Sneha Kulkarni", "text": "I can't log into the expense tool, keeps saying invalid credentials."},
+    {"id": "REQ-13", "employee": "Aman Gupta",     "text": "Laptop screen is flickering on and off, had it 2 years, might just need a fix not a replacement."},
+    {"id": "REQ-14", "employee": "Tanya Chopra",   "text": "Requesting approval to install a browser extension for productivity tracking."},
+    {"id": "REQ-15", "employee": "Rahul Menon",    "text": "hey can you help, its not working"},
 ]
 
 TICKETS = [
-    {"id": "TK-1042", "employee": "R. Verma",     "issue": "VPN credential expired",              "status": "Resolved (closed)"},
-    {"id": "TK-1043", "employee": "S. Iyer",      "issue": "Laptop replacement (3.2 yrs old)",    "status": "Approved — pending fulfillment (active)"},
-    {"id": "TK-1044", "employee": "A. Khan",      "issue": "Non-catalog software request",        "status": "Pending Security review (active)"},
-    {"id": "TK-1045", "employee": "P. Joshi",     "issue": "Mailbox quota increase",              "status": "Approved at 35GB (closed)"},
-    {"id": "TK-1046", "employee": "M. Das",       "issue": "Printer paper jam, floor 2",          "status": "Resolved (closed)"},
-    {"id": "TK-1047", "employee": "K. Singh",     "issue": "Home office equipment request",       "status": "Pending Finance (active)"},
-    {"id": "TK-1048", "employee": "T. Rao",       "issue": "Phishing email reported",             "status": "Escalated to Security — under investigation (active)"},
-    {"id": "TK-1049", "employee": "V. Nambiar",   "issue": "Password reset",                      "status": "Resolved (closed)"},
-    {"id": "TK-1050", "employee": "J. Fernandes", "issue": "Admin access request",                "status": "Rejected — no business justification provided (closed)"},
-    {"id": "TK-1051", "employee": "L. Menon",     "issue": "Guest Wi-Fi issued",                  "status": "Resolved (closed)"},
+    {"id": "TK-1042", "employee": "R. Verma",     "issue": "VPN credential expired",           "status": "Resolved (closed)"},
+    {"id": "TK-1043", "employee": "S. Iyer",      "issue": "Laptop replacement (3.2 yrs old)", "status": "Approved — pending fulfillment (active)"},
+    {"id": "TK-1044", "employee": "A. Khan",      "issue": "Non-catalog software request",     "status": "Pending Security review (active)"},
+    {"id": "TK-1045", "employee": "P. Joshi",     "issue": "Mailbox quota increase",           "status": "Approved at 35GB (closed)"},
+    {"id": "TK-1046", "employee": "M. Das",       "issue": "Printer paper jam, floor 2",       "status": "Resolved (closed)"},
+    {"id": "TK-1047", "employee": "K. Singh",     "issue": "Home office equipment request",    "status": "Pending Finance (active)"},
+    {"id": "TK-1048", "employee": "T. Rao",       "issue": "Phishing email reported",          "status": "Escalated to Security — under investigation (active)"},
+    {"id": "TK-1049", "employee": "V. Nambiar",   "issue": "Password reset",                   "status": "Resolved (closed)"},
+    {"id": "TK-1050", "employee": "J. Fernandes", "issue": "Admin access request",             "status": "Rejected — no business justification (closed)"},
+    {"id": "TK-1051", "employee": "L. Menon",     "issue": "Guest Wi-Fi issued",               "status": "Resolved (closed)"},
 ]
 
-
-# ===========================================================================
-# AUDIT LOG
-# ===========================================================================
 AUDIT_PATH = Path(__file__).resolve().parent / "data" / "audit_log.jsonl"
 
 
-def _audit_append(event: dict[str, Any]) -> None:
+# ===========================================================================
+# AUDIT
+# ===========================================================================
+def _audit_append(event: dict) -> None:
     try:
         AUDIT_PATH.parent.mkdir(parents=True, exist_ok=True)
         with AUDIT_PATH.open("a", encoding="utf-8") as f:
@@ -103,7 +94,7 @@ def _audit_append(event: dict[str, Any]) -> None:
         pass
 
 
-def _load_audit_rows() -> list[dict[str, Any]]:
+def _load_audit_rows() -> list:
     if not AUDIT_PATH.is_file():
         return []
     rows = []
@@ -122,44 +113,43 @@ def _load_audit_rows() -> list[dict[str, Any]]:
 # CLASSIFIER
 # ===========================================================================
 KEYWORD_RULES = [
-    # ORDER MATTERS: more specific first
-    ("phishing",              "security_incident",     "ESCALATE", "security_incident"),
-    ("forwarding it",         "security_incident",     "ESCALATE", "security_incident"),
-    ("admin access",          "admin_access",          "ESCALATE", "privileged_access_requires_authorization"),
-    ("root access",           "admin_access",          "ESCALATE", "privileged_access_requires_authorization"),
-    ("data-analysis",         "software_non_catalog",  "ESCALATE", "non_catalog_requires_security_review"),
-    ("browser extension",     "software_non_catalog",  "ESCALATE", "non_catalog_requires_security_review"),
-    ("not in the software",   "software_non_catalog",  "ESCALATE", "non_catalog_requires_security_review"),
-    ("contractor",            "vpn_contractor",        "ESCALATE", "contractor_requires_manager_approval"),
-    ("locked out",            "account_unlock",        "RESOLVE",  ""),
-    ("forgot my password",    "password_reset",        "RESOLVE",  ""),
-    ("password",              "password_reset",        "RESOLVE",  ""),
-    ("vpn stopped",           "vpn_renewal",           "RESOLVE",  ""),
-    ("credentials expired",   "vpn_renewal",           "RESOLVE",  ""),
-    ("vpn",                   "vpn_access",            "RESOLVE",  ""),
-    ("guest",                 "guest_wifi",            "RESOLVE",  ""),
-    ("wi-fi",                 "guest_wifi",            "RESOLVE",  ""),
-    ("wifi",                  "guest_wifi",            "RESOLVE",  ""),
-    ("paper jam",             "printer",               "ESCALATE", "printer_requires_asset_tag"),
-    ("printer",               "printer",               "ESCALATE", "printer_requires_asset_tag"),
-    ("mailbox",               "mailbox_quota",         "ESCALATE", "manager_approval_required"),
-    ("working from home",     "wfh_equipment",         "ESCALATE", "wfh_equipment_requires_manager_signoff"),
-    ("home office",           "wfh_equipment",         "ESCALATE", "wfh_equipment_requires_manager_signoff"),
-    ("monitor",               "wfh_equipment",         "ESCALATE", "wfh_equipment_requires_manager_signoff"),
-    ("expense tool",          "expense_tool",          "RESOLVE",  ""),
-    ("expense",               "expense_tool",          "RESOLVE",  ""),
-    ("won't turn on",         "laptop_repair",         "ESCALATE", "hardware_fault_requires_technician"),
-    ("completely dead",       "laptop_repair",         "ESCALATE", "hardware_fault_requires_technician"),
-    ("screen is flickering",  "laptop_repair",         "ESCALATE", "hardware_fault_requires_technician"),
-    ("flickering",            "laptop_repair",         "ESCALATE", "hardware_fault_requires_technician"),
-    ("laptop",                "laptop_repair",         "ESCALATE", "hardware_fault_requires_technician"),
-    ("its not working",       "unclear",               "CLARIFY",  "insufficient_information"),
-    ("it's not working",      "unclear",               "CLARIFY",  "insufficient_information"),
-    ("not working",           "unclear",               "CLARIFY",  "insufficient_information"),
+    ("phishing",              "security_incident",    "ESCALATE", "security_incident"),
+    ("forwarding it",         "security_incident",    "ESCALATE", "security_incident"),
+    ("admin access",          "admin_access",         "ESCALATE", "privileged_access_requires_authorization"),
+    ("root access",           "admin_access",         "ESCALATE", "privileged_access_requires_authorization"),
+    ("data-analysis",         "software_non_catalog", "ESCALATE", "non_catalog_requires_security_review"),
+    ("browser extension",     "software_non_catalog", "ESCALATE", "non_catalog_requires_security_review"),
+    ("not in the software",   "software_non_catalog", "ESCALATE", "non_catalog_requires_security_review"),
+    ("contractor",            "vpn_contractor",       "ESCALATE", "contractor_requires_manager_approval"),
+    ("locked out",            "account_unlock",       "RESOLVE",  ""),
+    ("forgot my password",    "password_reset",       "RESOLVE",  ""),
+    ("password",              "password_reset",       "RESOLVE",  ""),
+    ("vpn stopped",           "vpn_renewal",          "RESOLVE",  ""),
+    ("credentials expired",   "vpn_renewal",          "RESOLVE",  ""),
+    ("vpn",                   "vpn_access",           "RESOLVE",  ""),
+    ("guest",                 "guest_wifi",           "RESOLVE",  ""),
+    ("wi-fi",                 "guest_wifi",           "RESOLVE",  ""),
+    ("wifi",                  "guest_wifi",           "RESOLVE",  ""),
+    ("paper jam",             "printer",              "ESCALATE", "printer_requires_asset_tag"),
+    ("printer",               "printer",              "ESCALATE", "printer_requires_asset_tag"),
+    ("mailbox",               "mailbox_quota",        "ESCALATE", "manager_approval_required"),
+    ("working from home",     "wfh_equipment",        "ESCALATE", "wfh_equipment_requires_manager_signoff"),
+    ("home office",           "wfh_equipment",        "ESCALATE", "wfh_equipment_requires_manager_signoff"),
+    ("monitor",               "wfh_equipment",        "ESCALATE", "wfh_equipment_requires_manager_signoff"),
+    ("expense tool",          "expense_tool",         "RESOLVE",  ""),
+    ("expense",               "expense_tool",         "RESOLVE",  ""),
+    ("won't turn on",         "laptop_repair",        "ESCALATE", "hardware_fault_requires_technician"),
+    ("completely dead",       "laptop_repair",        "ESCALATE", "hardware_fault_requires_technician"),
+    ("screen is flickering",  "laptop_repair",        "ESCALATE", "hardware_fault_requires_technician"),
+    ("flickering",            "laptop_repair",        "ESCALATE", "hardware_fault_requires_technician"),
+    ("laptop",                "laptop_repair",        "ESCALATE", "hardware_fault_requires_technician"),
+    ("its not working",       "unclear",              "CLARIFY",  "insufficient_information"),
+    ("it's not working",      "unclear",              "CLARIFY",  "insufficient_information"),
+    ("not working",           "unclear",              "CLARIFY",  "insufficient_information"),
 ]
 
 
-def _policy_sources(category: str) -> list[str]:
+def _policy_sources(category: str) -> list:
     return {
         "password_reset":       ["K-01"],
         "account_unlock":       ["K-01"],
@@ -179,13 +169,27 @@ def _policy_sources(category: str) -> list[str]:
     }.get(category, [])
 
 
-def _classify(message: str) -> dict[str, Any]:
+def _action_text(decision: str, category: str) -> str:
+    if decision == "RESOLVE":
+        return {
+            "password_reset": "Password reset via self-service portal.",
+            "account_unlock": "Account unlocked by IT.",
+            "vpn_renewal":    "Renew VPN credentials via the VPN portal.",
+            "vpn_access":     "VPN access granted.",
+            "guest_wifi":     "Generate guest Wi-Fi from the front-desk kiosk.",
+            "expense_tool":   "Check login credentials with the expense tool team.",
+        }.get(category, "Follow approved IT workflow.")
+    if decision == "ESCALATE":
+        return "Routed to the correct team with a structured ticket."
+    return "Awaiting employee clarification."
+
+
+def _classify(message: str) -> dict:
     text = (message or "").lower()
     category = "other"
     decision = "CLARIFY"
     reason = "unclear_request"
 
-    # Special-case: laptop replacement with year count
     is_laptop_context = any(k in text for k in ("laptop", "dead", "replace", "replacement"))
     year_match = re.search(r"(\d+(?:\.\d+)?)\s*year", text)
     if is_laptop_context and year_match:
@@ -211,36 +215,20 @@ def _classify(message: str) -> dict[str, Any]:
         followup = "Could you share what system you're using, what you were doing, and the exact error message?"
 
     return {
-        "decision": decision,
-        "category": category,
-        "reason": reason,
-        "escalate_reason": reason if decision == "ESCALATE" else "",
-        "risk_level": {"RESOLVE": "LOW", "CLARIFY": "MEDIUM", "ESCALATE": "HIGH"}.get(decision, "MEDIUM"),
-        "required_action": _action_text(decision, category),
+        "decision":          decision,
+        "category":          category,
+        "reason":            reason,
+        "escalate_reason":   reason if decision == "ESCALATE" else "",
+        "risk_level":        {"RESOLVE": "LOW", "CLARIFY": "MEDIUM", "ESCALATE": "HIGH"}.get(decision, "MEDIUM"),
+        "required_action":   _action_text(decision, category),
         "followup_question": followup or "",
-        "policy_sources": _policy_sources(category),
+        "policy_sources":    _policy_sources(category),
     }
 
 
-def _action_text(decision: str, category: str) -> str:
-    if decision == "RESOLVE":
-        return {
-            "password_reset": "Password reset via self-service portal.",
-            "account_unlock": "Account unlocked by IT.",
-            "vpn_renewal":    "Renew VPN credentials via the VPN portal.",
-            "vpn_access":     "VPN access granted.",
-            "guest_wifi":     "Generate guest Wi-Fi from the front-desk kiosk.",
-            "expense_tool":   "Check login credentials with the expense tool team.",
-        }.get(category, "Follow approved IT workflow.")
-    if decision == "ESCALATE":
-        return "Routed to the correct team with a structured ticket."
-    return "Awaiting employee clarification."
-
-
-def _policy_preview(category: str) -> list[dict[str, str]]:
-    sources = _policy_sources(category)
+def _policy_preview(category: str) -> list:
     chunks = []
-    for src in sources:
+    for src in _policy_sources(category):
         marker = f"## {src}"
         idx = POLICY_TEXT.find(marker)
         if idx == -1:
@@ -251,7 +239,7 @@ def _policy_preview(category: str) -> list[dict[str, str]]:
     return chunks
 
 
-def _render_answer(message: str, decision: dict[str, Any]) -> str:
+def _render_answer(message: str, decision: dict) -> str:
     cat = decision["category"]
     dec = decision["decision"]
     if dec == "RESOLVE":
@@ -278,7 +266,7 @@ def _render_answer(message: str, decision: dict[str, Any]) -> str:
     return "🤔 I need more info. " + (decision.get("followup_question") or "What system, what were you doing, and what's the exact error?")
 
 
-def _run_agent(message: str, employee: str = "Employee") -> dict[str, Any]:
+def _run_agent(message: str, employee: str = "Employee") -> dict:
     decision = _classify(message)
     answer = _render_answer(message, decision)
     ticket = None
@@ -293,9 +281,9 @@ def _run_agent(message: str, employee: str = "Employee") -> dict[str, Any]:
         }
     _audit_append({
         "event_type": "request_processed",
-        "input": message[:200],
-        "employee": employee,
-        "result": {"decision": decision["decision"], "category": decision["category"], "ticket": ticket},
+        "input":      message[:200],
+        "employee":   employee,
+        "result":     {"decision": decision["decision"], "category": decision["category"], "ticket": ticket},
     })
     return {
         "response": answer,
@@ -310,15 +298,11 @@ def _run_agent(message: str, employee: str = "Employee") -> dict[str, Any]:
 
 
 # ===========================================================================
-# SESSION STATE
+# STATE
 # ===========================================================================
-def _init_state() -> None:
-    for k, v in {"messages": [], "batch_rows": None, "theme_mode": "DARK MODE"}.items():
-        if k not in st.session_state:
-            st.session_state[k] = v
-
-
-_init_state()
+for _k, _v in {"messages": [], "batch_rows": None, "theme_mode": "DARK MODE"}.items():
+    if _k not in st.session_state:
+        st.session_state[_k] = _v
 
 
 # ===========================================================================
@@ -333,22 +317,17 @@ def _render_status(label: str, value: str, healthy: bool) -> None:
     )
 
 
-def _render_ticket(ticket: dict[str, Any]) -> None:
-    tid    = escape(str(ticket.get("ticket_id", "Pending")))
-    emp    = escape(str(ticket.get("employee_name", "Not available")))
-    issue  = escape(str(ticket.get("issue_type", "IT support")))
-    prio   = escape(str(ticket.get("priority", "Not specified")))
-    status = escape(str(ticket.get("status", "Open")))
-    reason = escape(str(ticket.get("escalation_reason", "Review required")))
+def _render_ticket(ticket: dict) -> None:
     st.markdown(
         f"""
         <div class="ticket-card">
-          <div class="ticket-heading"><span class="mono">{tid}</span><span class="ticket-status">{status}</span></div>
+          <div class="ticket-heading"><span class="mono">{escape(str(ticket.get('ticket_id', 'Pending')))}</span>
+          <span class="ticket-status">{escape(str(ticket.get('status', 'Open')))}</span></div>
           <div class="ticket-grid">
-            <div><small>Employee</small><strong>{emp}</strong></div>
-            <div><small>Issue</small><strong>{issue}</strong></div>
-            <div><small>Priority</small><strong>{prio}</strong></div>
-            <div><small>Escalation reason</small><strong>{reason}</strong></div>
+            <div><small>Employee</small><strong>{escape(str(ticket.get('employee_name', 'N/A')))}</strong></div>
+            <div><small>Issue</small><strong>{escape(str(ticket.get('issue_type', 'IT')))}</strong></div>
+            <div><small>Priority</small><strong>{escape(str(ticket.get('priority', 'N/A')))}</strong></div>
+            <div><small>Escalation reason</small><strong>{escape(str(ticket.get('escalation_reason', 'Review')))}</strong></div>
           </div>
         </div>
         """,
@@ -356,7 +335,7 @@ def _render_ticket(ticket: dict[str, Any]) -> None:
     )
 
 
-def _render_decision(decision: dict[str, Any]) -> None:
+def _render_decision(decision: dict) -> None:
     label = str(decision.get("decision", "UNKNOWN"))
     tone = {"RESOLVE": "resolve", "CLARIFY": "clarify", "ESCALATE": "escalate"}.get(label, "neutral")
     st.markdown(
@@ -365,7 +344,7 @@ def _render_decision(decision: dict[str, Any]) -> None:
           <div class="decision-label">Agent Decision</div>
           <div class="decision-value">{escape(label)}</div>
           <div class="decision-details">
-            <div><small>Risk</small><strong>{escape(str(decision.get('risk_level', 'Not specified')))}</strong></div>
+            <div><small>Risk</small><strong>{escape(str(decision.get('risk_level', 'N/A')))}</strong></div>
             <div><small>Category</small><strong>{escape(str(decision.get('category', 'unknown')))}</strong></div>
             <div><small>Policy</small><strong>{escape(', '.join(decision.get('policy_sources', [])) or 'None')}</strong></div>
           </div>
@@ -375,7 +354,7 @@ def _render_decision(decision: dict[str, Any]) -> None:
     )
 
 
-def _render_policy(chunks: list[dict[str, Any]]) -> None:
+def _render_policy(chunks: list) -> None:
     with st.expander("POLICY INTELLIGENCE", expanded=False):
         if not chunks:
             st.info("No relevant policy citations for this request.")
@@ -393,7 +372,7 @@ _dark = st.session_state.theme_mode == "DARK MODE"
 st.markdown(
     f"""
     <style>
-    :root {{ --ink: {"#eaf5fb" if _dark else "#17212b"}; --muted: {"#8fa9b8" if _dark else "#64727e"}; --line: {"#254458" if _dark else "#dce3e8"}; --card: {"#0e1c2b" if _dark else "#ffffff"}; --panel: {"rgba(14,28,43,.86)" if _dark else "#f7f9fa"}; --accent: #59c7e8; --page: {"#08121d" if _dark else "#f2f6f8"}; }}
+    :root {{ --ink: {"#eaf5fb" if _dark else "#17212b"}; --muted: {"#8fa9b8" if _dark else "#64727e"}; --line: {"#254458" if _dark else "#dce3e8"}; --card: {"#0e1c2b" if _dark else "#ffffff"}; --accent: #59c7e8; --page: {"#08121d" if _dark else "#f2f6f8"}; }}
     html, body, [data-testid="stAppViewContainer"] {{ background: var(--page); color: var(--ink); }}
     .block-container {{ max-width: 1380px; padding-top: 2rem; }}
     [data-testid="stSidebar"] {{ background: {"#0a1724" if _dark else "#edf3f6"}; border-right: 1px solid var(--line); }}
@@ -437,14 +416,10 @@ st.markdown(
 )
 
 cols = st.columns(4)
-with cols[0]:
-    _render_status("Agent", "Ready", True)
-with cols[1]:
-    _render_status("Policy KB", "Available", True)
-with cols[2]:
-    _render_status("Ticketing", "Enabled", True)
-with cols[3]:
-    _render_status("Audit", "Enabled", True)
+with cols[0]: _render_status("Agent", "Ready", True)
+with cols[1]: _render_status("Policy KB", "Available", True)
+with cols[2]: _render_status("Ticketing", "Enabled", True)
+with cols[3]: _render_status("Audit", "Enabled", True)
 
 
 # ===========================================================================
@@ -543,4 +518,26 @@ with tab_queue:
     st.dataframe(TICKETS, use_container_width=True, hide_index=True)
 
 with tab_audit:
-    st.markdown("### AUDIT TRAIL
+    st.markdown("### AUDIT TRAIL")
+    rows = _load_audit_rows()
+    st.metric("Total audit events", len(rows))
+    if rows:
+        st.dataframe(rows[-100:], use_container_width=True, hide_index=True)
+    else:
+        st.info("Audit events will appear here after the first request is processed.")
+
+with tab_about:
+    st.markdown("### ARCHITECTURE")
+    st.code(
+        "Employee Request\n"
+        "  -> Classify (rule engine)\n"
+        "  -> Policy Lookup\n"
+        "  -> RESOLVE / CLARIFY / ESCALATE\n"
+        "  -> Structured Ticket + Audit Trail\n"
+        "  -> Streamlit UI",
+        language="text",
+    )
+    st.write("Deterministic, offline-first. No external LLM or API key required.")
+    st.write(f"Policy KB loaded: {len(POLICY_TEXT)} chars")
+    st.write(f"Requests loaded: {len(REQUESTS)}")
+    st.write(f"Tickets loaded: {len(TICKETS)}")
