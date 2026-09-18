@@ -1,0 +1,5 @@
+streamlit>=1.38,<2
+scikit-learn>=1.5,<2
+pytest>=8,<9
+pydantic>=2,<3
+pyyaml>=6,<7
