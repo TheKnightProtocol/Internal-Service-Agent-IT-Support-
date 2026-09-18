@@ -3,13 +3,18 @@ import os
 from html import escape
 from pathlib import Path
 from typing import Any
+import sys
+
+# Ensure local project packages are importable on Streamlit Cloud.
+ROOT = Path(__file__).resolve().parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 import streamlit as st
 import yaml
 
 from agent import ITServiceAgent
 
-ROOT = Path(__file__).parent
 POLICY_PATH = ROOT / "data" / "policies" / "policies.md"
 TICKET_STORE_PATH = ROOT / "data" / "tickets.json"
 AUDIT_PATH = ROOT / "data" / "audit_log.jsonl"
